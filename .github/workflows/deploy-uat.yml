@@ -1,0 +1,23 @@
+name: Deploy to UAT
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: windows-latest
+
+    steps:
+    - name: Deploy to Windows Server
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        password: ${{ secrets.SERVER_PASSWORD }}
+        script: |
+          cd C:\Projects\POS\POS_Uat
+          git pull origin main
+          dotnet publish -c Release -o publish
+          powershell -Command "Import-Module WebAdministration; Restart-WebAppPool 'POS_UAT'"
